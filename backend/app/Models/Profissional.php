@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Profissional extends Model
 {
+    protected $table = 'profissionais';
     protected $fillable = ['loja_id', 'user_id', 'name', 'ativo'];
 
     public function loja()
