@@ -25,12 +25,12 @@ class DashboardController extends Controller
         $totalConcluidos   = Agendamento::whereDate('scheduled_at', $hoje)->where('status', 'concluido')->count();
         $alertasEstoque    = Produto::where('ativo', true)->whereColumn('estoque_atual', '<=', 'estoque_minimo')->count();
 
-        $fatBarbearia = Agendamento::where('loja_id', $barbearia?->id)
+        $fatBarbearia = Agendamento::where('agendamentos.loja_id', $barbearia?->id)
             ->whereDate('scheduled_at', $hoje)->where('status', 'concluido')
             ->join('servicos', 'agendamentos.servico_id', '=', 'servicos.id')
             ->sum('servicos.price_cents');
 
-        $fatLava = Agendamento::where('loja_id', $lavaKuat?->id)
+        $fatLava = Agendamento::where('agendamentos.loja_id', $lavaKuat?->id)
             ->whereDate('scheduled_at', $hoje)->where('status', 'concluido')
             ->join('servicos', 'agendamentos.servico_id', '=', 'servicos.id')
             ->sum('servicos.price_cents');
