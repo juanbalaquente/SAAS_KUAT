@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Agendamento;
 use App\Models\Cliente;
 use App\Models\Loja;
+use App\Models\Produto;
 use App\Models\Servico;
 use App\Jobs\EnviarConfirmacaoAgendamento;
 use Carbon\Carbon;
@@ -20,6 +21,18 @@ class AgendamentoPublicoController extends Controller
             'success' => true,
             'data'    => $loja->servicos()->where('ativo', true)->get(),
         ]);
+    }
+
+    public function produtos(string $slug)
+    {
+        Loja::where('slug', $slug)->firstOrFail();
+        $produtos = Produto::where('ativo', true)
+            ->where('estoque_atual', '>', 0)
+            ->orderBy('categoria')
+            ->orderBy('nome')
+            ->get(['id', 'nome', 'categoria', 'preco_cents', 'estoque_atual']);
+
+        return response()->json(['success' => true, 'data' => $produtos]);
     }
 
     public function disponibilidade(Request $request, string $slug)

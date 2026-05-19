@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::get('/lojas/{slug}/servicos',       [AgendamentoPublicoController::class, 'servicos']);
 Route::get('/lojas/{slug}/disponibilidade',[AgendamentoPublicoController::class, 'disponibilidade']);
+Route::get('/lojas/{slug}/produtos',       [AgendamentoPublicoController::class, 'produtos']);
 Route::post('/lojas/{slug}/agendar',       [AgendamentoPublicoController::class, 'agendar']);
 Route::get('/agendamentos/{id}/publico',   [AgendamentoPublicoController::class, 'show']);
 Route::patch('/agendamentos/{id}/cancelar',[AgendamentoPublicoController::class, 'cancelar']);
