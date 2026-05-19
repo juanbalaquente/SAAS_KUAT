@@ -3,10 +3,13 @@ import { useAuth } from '../store/AuthContext';
 
 const navByRole = {
   dono: [
-    { to: '/dashboard', label: 'Dashboard' },
-    { to: '/barbearia', label: 'Barbearia' },
-    { to: '/lavajato', label: 'Lava Kuat' },
-    { to: '/adega', label: 'Adega R1' },
+    { to: '/dashboard',    label: 'Dashboard'     },
+    { to: '/agendamentos', label: 'Agendamentos'  },
+    { to: '/barbearia',    label: 'Barbearia'     },
+    { to: '/lavajato',     label: 'Lava Kuat'     },
+    { to: '/adega',        label: 'Adega R1'      },
+    { to: '/relatorios',   label: 'Relatórios'    },
+    { to: '/gestao',       label: 'Gestão'        },
   ],
   barbeiro: [{ to: '/barbearia', label: 'Barbearia Kuat' }],
   atendente_lava: [{ to: '/lavajato', label: 'Lava Kuat' }],

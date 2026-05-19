@@ -8,9 +8,11 @@ use Illuminate\Http\Request;
 
 class ProdutoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(['success' => true, 'data' => Produto::where('ativo', true)->get()]);
+        $query = Produto::query();
+        if (!$request->boolean('todos')) $query->where('ativo', true);
+        return response()->json(['success' => true, 'data' => $query->orderBy('categoria')->orderBy('nome')->get()]);
     }
 
     public function store(Request $request)

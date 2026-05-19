@@ -11,6 +11,9 @@ import LavaJatoPage from './pages/LavaJatoPage';
 import AdegaPage from './pages/AdegaPage';
 import AgendamentoPage from './pages/AgendamentoPage';
 import ConfirmacaoPage from './pages/ConfirmacaoPage';
+import RelatoriosPage from './pages/RelatoriosPage';
+import AgendamentosAdminPage from './pages/AgendamentosAdminPage';
+import GestaoPage from './pages/GestaoPage';
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30000 } },
@@ -56,6 +59,30 @@ export default function App() {
               element={
                 <ProtectedRoute roles={['dono', 'atendente_adega']}>
                   <AdegaPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/relatorios"
+              element={
+                <ProtectedRoute roles={['dono']}>
+                  <RelatoriosPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/agendamentos"
+              element={
+                <ProtectedRoute roles={['dono']}>
+                  <AgendamentosAdminPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gestao"
+              element={
+                <ProtectedRoute roles={['dono']}>
+                  <GestaoPage />
                 </ProtectedRoute>
               }
             />

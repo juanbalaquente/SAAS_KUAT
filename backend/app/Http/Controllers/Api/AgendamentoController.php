@@ -13,8 +13,11 @@ class AgendamentoController extends Controller
     {
         $query = Agendamento::with(['cliente', 'servico', 'profissional', 'loja']);
         if ($request->loja_id) $query->where('loja_id', $request->loja_id);
-        if ($request->data) $query->whereDate('scheduled_at', $request->data);
-        return response()->json(['success' => true, 'data' => $query->orderBy('scheduled_at')->get()]);
+        if ($request->status)  $query->where('status', $request->status);
+        if ($request->data)    $query->whereDate('scheduled_at', $request->data);
+        if ($request->inicio)  $query->whereDate('scheduled_at', '>=', $request->inicio);
+        if ($request->fim)     $query->whereDate('scheduled_at', '<=', $request->fim);
+        return response()->json(['success' => true, 'data' => $query->orderBy('scheduled_at', 'desc')->get()]);
     }
 
     public function store(Request $request)
