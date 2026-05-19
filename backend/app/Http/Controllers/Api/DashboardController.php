@@ -49,18 +49,18 @@ class DashboardController extends Controller
                 'barbearia_kuat' => [
                     'agendamentos_hoje' => (clone $agBarbearia)->count(),
                     'concluidos'        => (clone $agBarbearia)->where('status', 'concluido')->count(),
-                    'faturamento'       => $fatBarbearia,
+                    'faturamento'       => (int) $fatBarbearia,
                 ],
                 'lava_kuat' => [
                     'agendamentos_hoje' => (clone $agLava)->count(),
                     'boxes_livres'      => Box::where('status', 'livre')->count(),
                     'total_boxes'       => Box::count(),
-                    'faturamento'       => $fatLava,
+                    'faturamento'       => (int) $fatLava,
                 ],
                 'adega_r1' => [
                     'vendas_hoje'        => Pedido::whereDate('created_at', $hoje)->where('status', '!=', 'cancelado')->count(),
                     'entregas_pendentes' => Pedido::whereIn('status', ['aguardando', 'preparando', 'em_rota'])->count(),
-                    'faturamento'        => $fatAdega,
+                    'faturamento'        => (int) $fatAdega,
                 ],
             ],
         ]);
