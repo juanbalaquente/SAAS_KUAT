@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\NotificacoesLog;
+use App\Models\NotificacaoLog;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -28,8 +28,8 @@ class WhatsAppService
             if ($this->url && $this->key) {
                 $response = Http::withHeaders(['apikey' => $this->key])
                     ->post("{$this->url}/message/sendText/{$this->instance}", [
-                        'number' => $phone,
-                        'text'   => $message,
+                        'number'      => $phone,
+                        'textMessage' => ['text' => $message],
                     ]);
 
                 if (!$response->successful()) {
@@ -48,7 +48,7 @@ class WhatsAppService
             Log::error('WhatsApp exception: ' . $e->getMessage());
         }
 
-        NotificacoesLog::create([
+        NotificacaoLog::create([
             'cliente_id' => $clienteId,
             'tipo'       => 'whatsapp',
             'mensagem'   => $message,
