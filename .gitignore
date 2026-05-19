@@ -1,8 +1,19 @@
-/vendor
-/node_modules
-.env
-.env.local
+# Backend
+backend/vendor/
+backend/.env
+backend/storage/framework/cache/
+backend/storage/framework/sessions/
+backend/storage/framework/views/
+backend/storage/logs/
+backend/public/hot
+backend/public/storage
+
+# Frontend
+frontend/node_modules/
+frontend/.env
+frontend/dist/
+
+# Projeto
+.claude/
+Commitar
 *.log
-/storage/logs
-/public/hot
-/public/storage
