@@ -19,17 +19,25 @@ export default function ConfirmacaoPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
+      <div style={{ minHeight: '100vh', background: '#0F1117', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{
+          width: '36px',
+          height: '36px',
+          border: '3px solid rgba(59,130,246,0.2)',
+          borderTopColor: '#3B82F6',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite',
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
   if (!ag) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="text-center">
-          <p className="text-gray-500 mb-4">Agendamento não encontrado.</p>
+      <div style={{ minHeight: '100vh', background: '#0F1117', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ color: 'rgba(240,240,240,0.5)', marginBottom: '16px' }}>Agendamento não encontrado.</p>
           <Link to="/" className="btn-primary">Voltar ao início</Link>
         </div>
       </div>
@@ -37,53 +45,124 @@ export default function ConfirmacaoPage() {
   }
 
   const hora = new Date(ag.scheduled_at).toLocaleString('pt-BR', {
-    weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
+    weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
   });
 
+  const isCanceled = cancelado || ag.status === 'cancelado';
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
-          {cancelado || ag.status === 'cancelado' ? (
+    <div style={{ minHeight: '100vh', background: '#0F1117', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <div style={{ maxWidth: '440px', width: '100%' }}>
+        <div style={{
+          background: '#161B22',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: '16px',
+          padding: '40px 36px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.3), 0 20px 40px rgba(0,0,0,0.25)',
+          textAlign: 'center',
+        }}>
+          {isCanceled ? (
             <>
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">❌</div>
-              <h1 className="text-xl font-bold text-gray-900 mb-2">Agendamento cancelado</h1>
-              <p className="text-gray-500 text-sm">Seu agendamento foi cancelado com sucesso.</p>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                background: 'rgba(239,68,68,0.1)',
+                border: '1px solid rgba(239,68,68,0.2)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px',
+                fontSize: '1.75rem',
+              }}>
+                ✕
+              </div>
+              <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#F0F0F0', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
+                Agendamento cancelado
+              </h1>
+              <p style={{ fontSize: '0.875rem', color: 'rgba(240,240,240,0.5)', margin: 0 }}>
+                Seu agendamento foi cancelado com sucesso.
+              </p>
             </>
           ) : (
             <>
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">✅</div>
-              <h1 className="text-xl font-bold text-gray-900 mb-2">Agendamento confirmado!</h1>
-              <p className="text-gray-500 text-sm mb-6">Você receberá uma confirmação pelo WhatsApp.</p>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                background: 'rgba(34,197,94,0.1)',
+                border: '1px solid rgba(34,197,94,0.2)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 20px',
+                fontSize: '1.75rem',
+              }}>
+                ✓
+              </div>
+              <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#F0F0F0', margin: '0 0 8px', letterSpacing: '-0.02em' }}>
+                Agendamento confirmado!
+              </h1>
+              <p style={{ fontSize: '0.875rem', color: 'rgba(240,240,240,0.5)', margin: '0 0 28px' }}>
+                Você receberá uma confirmação pelo WhatsApp.
+              </p>
 
-              <div className="bg-gray-50 rounded-xl p-4 text-left space-y-2 mb-6">
-                <div className="flex justify-between">
-                  <span className="text-gray-500 text-sm">Cliente</span>
-                  <span className="text-gray-900 font-medium text-sm">{ag.cliente?.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500 text-sm">Serviço</span>
-                  <span className="text-gray-900 font-medium text-sm">{ag.servico?.name}</span>
-                </div>
-                {ag.profissional && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-500 text-sm">Profissional</span>
-                    <span className="text-gray-900 font-medium text-sm">{ag.profissional.name}</span>
+              {/* Summary */}
+              <div style={{
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: '10px',
+                padding: '16px',
+                marginBottom: '16px',
+                textAlign: 'left',
+              }}>
+                {[
+                  { label: 'Cliente', value: ag.cliente?.name },
+                  { label: 'Serviço', value: ag.servico?.name },
+                  ag.profissional && { label: 'Profissional', value: ag.profissional.name },
+                  { label: 'Horário', value: hora, capitalize: true },
+                  {
+                    label: 'Valor',
+                    value: ag.servico?.price_cents > 0
+                      ? `R$${(ag.servico.price_cents / 100).toFixed(2)}`
+                      : 'Grátis',
+                    highlight: true,
+                  },
+                ].filter(Boolean).map(({ label, value, capitalize, highlight }, i, arr) => (
+                  <div key={label} style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: '12px',
+                    paddingBottom: i < arr.length - 1 ? '10px' : 0,
+                    marginBottom: i < arr.length - 1 ? '10px' : 0,
+                    borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                  }}>
+                    <span style={{ fontSize: '0.8125rem', color: 'rgba(240,240,240,0.45)' }}>{label}</span>
+                    <span style={{
+                      fontSize: '0.8125rem',
+                      fontWeight: highlight ? 700 : 500,
+                      color: highlight ? '#4ADE80' : '#F0F0F0',
+                      textAlign: 'right',
+                      textTransform: capitalize ? 'capitalize' : 'none',
+                    }}>
+                      {value}
+                    </span>
                   </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-gray-500 text-sm">Horário</span>
-                  <span className="text-gray-900 font-medium text-sm capitalize">{hora}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500 text-sm">Valor</span>
-                  <span className="text-green-700 font-bold text-sm">
-                    {ag.servico?.price_cents > 0 ? `R$${(ag.servico.price_cents / 100).toFixed(2)}` : 'Grátis'}
-                  </span>
-                </div>
+                ))}
               </div>
 
-              <div className="text-xs text-gray-400 bg-gray-50 rounded-lg p-2 mb-4 font-mono">
+              {/* Code */}
+              <div style={{
+                fontSize: '0.75rem',
+                color: 'rgba(240,240,240,0.35)',
+                fontFamily: 'monospace',
+                background: 'rgba(255,255,255,0.04)',
+                borderRadius: '6px',
+                padding: '8px 12px',
+                marginBottom: '20px',
+                letterSpacing: '0.05em',
+              }}>
                 Código: #{String(ag.id).padStart(6, '0')}
               </div>
 
@@ -91,7 +170,8 @@ export default function ConfirmacaoPage() {
                 <button
                   onClick={() => cancelar()}
                   disabled={isPending}
-                  className="btn-danger w-full justify-center"
+                  className="btn-danger"
+                  style={{ width: '100%', justifyContent: 'center', padding: '11px' }}
                 >
                   {isPending ? 'Cancelando...' : 'Cancelar agendamento'}
                 </button>
@@ -99,7 +179,19 @@ export default function ConfirmacaoPage() {
             </>
           )}
 
-          <Link to="/" className="block mt-4 text-sm text-blue-600 hover:underline">
+          <Link
+            to="/"
+            style={{
+              display: 'block',
+              marginTop: '20px',
+              fontSize: '0.875rem',
+              color: 'rgba(240,240,240,0.4)',
+              textDecoration: 'none',
+              transition: 'color 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(240,240,240,0.75)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(240,240,240,0.4)'; }}
+          >
             ← Voltar ao início
           </Link>
         </div>

@@ -4,38 +4,59 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { format, addDays, startOfDay } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import api from '../services/api';
 
-const LOJA_NAMES = {
-  barbearia_kuat: { name: 'Barbearia Kuat', emoji: '✂️', color: 'bg-orange-500' },
-  lava_kuat: { name: 'Lava Kuat', emoji: '🚗', color: 'bg-yellow-500' },
-  adega_r1: { name: 'Adega R1', emoji: '🍷', color: 'bg-green-600' },
+const ScissorsIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/>
+    <line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/>
+    <line x1="8.12" y1="8.12" x2="12" y2="12"/>
+  </svg>
+);
+
+const CarIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
+    <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+  </svg>
+);
+
+const WineIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/>
+    <path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5z"/>
+  </svg>
+);
+
+const LOJA_CONFIG = {
+  barbearia_kuat: { name: 'Barbearia Kuat', Icon: ScissorsIcon, color: '#C4622D', colorDark: '#9C4A1F' },
+  lava_kuat:      { name: 'Lava Kuat',      Icon: CarIcon,      color: '#2E6B8A', colorDark: '#1F4E6B' },
+  adega_r1:       { name: 'Adega R1',       Icon: WineIcon,     color: '#2D6A4F', colorDark: '#1F4E38' },
 };
 
 const clienteSchema = z.object({
-  name: z.string().min(2, 'Nome obrigatório'),
+  name:  z.string().min(2, 'Nome obrigatório'),
   phone: z.string().min(10, 'Telefone inválido'),
   email: z.string().email('E-mail inválido').optional().or(z.literal('')),
 });
 
-const STEPS = ['Serviço', 'Profissional', 'Data/Hora', 'Seus dados', 'Confirmação'];
+const STEPS = ['Serviço', 'Profissional', 'Data/Hora', 'Seus dados'];
 
 export default function AgendamentoPage() {
   const { loja } = useParams();
   const navigate = useNavigate();
-  const lojaInfo = LOJA_NAMES[loja] || { name: loja, emoji: '🏪', color: 'bg-gray-600' };
+  const config = LOJA_CONFIG[loja] || { name: loja, Icon: () => null, color: '#555', colorDark: '#333' };
+  const Icon = config.Icon;
 
   const [step, setStep] = useState(0);
-  const [selectedServico, setSelectedServico] = useState(null);
+  const [selectedServico, setSelectedServico]       = useState(null);
   const [selectedProfissional, setSelectedProfissional] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedDate, setSelectedDate]             = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [selectedSlot, setSelectedSlot]             = useState(null);
 
-  const { register, handleSubmit, formState: { errors }, getValues } = useForm({
-    resolver: zodResolver(clienteSchema),
-  });
+  const { register, handleSubmit, formState: { errors } } = useForm({ resolver: zodResolver(clienteSchema) });
 
   const { data: servicos } = useQuery({
     queryKey: ['servicos', loja],
@@ -45,11 +66,7 @@ export default function AgendamentoPage() {
   const { data: disponibilidade } = useQuery({
     queryKey: ['disponibilidade', loja, selectedServico?.id, selectedDate, selectedProfissional?.id],
     queryFn: () => api.get(`/lojas/${loja}/disponibilidade`, {
-      params: {
-        servico_id: selectedServico?.id,
-        data: selectedDate,
-        profissional_id: selectedProfissional?.id || undefined,
-      }
+      params: { servico_id: selectedServico?.id, data: selectedDate, profissional_id: selectedProfissional?.id || undefined },
     }).then((r) => r.data.data),
     enabled: !!selectedServico && step >= 2,
   });
@@ -70,26 +87,76 @@ export default function AgendamentoPage() {
     });
   };
 
+  const inputStyle = {
+    width: '100%',
+    padding: '10px 14px',
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '8px',
+    color: '#F0F0F0',
+    fontFamily: 'inherit',
+    fontSize: '0.9375rem',
+    outline: 'none',
+    transition: 'border-color 0.2s',
+    boxSizing: 'border-box',
+  };
+
+  const labelStyle = {
+    display: 'block',
+    fontSize: '0.8125rem',
+    fontWeight: 500,
+    color: 'rgba(240,240,240,0.65)',
+    marginBottom: '6px',
+  };
+
   const stepContent = [
     // Step 0: Serviço
     <div key="servico">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Escolha o serviço</h2>
-      <div className="grid gap-3">
+      <h2 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#F0F0F0', margin: '0 0 16px', letterSpacing: '-0.02em' }}>
+        Escolha o serviço
+      </h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {servicos?.map((s) => (
           <button
             key={s.id}
             onClick={() => { setSelectedServico(s); setStep(1); }}
-            className={`card text-left hover:border-blue-400 border-2 transition ${selectedServico?.id === s.id ? 'border-blue-500' : 'border-transparent'}`}
+            style={{
+              background: selectedServico?.id === s.id ? `rgba(${config.color === '#C4622D' ? '196,98,45' : config.color === '#2E6B8A' ? '46,107,138' : '45,106,79'},0.12)` : '#161B22',
+              border: selectedServico?.id === s.id
+                ? `1px solid ${config.color}`
+                : '1px solid rgba(255,255,255,0.07)',
+              borderLeft: selectedServico?.id === s.id ? `4px solid ${config.color}` : '1px solid rgba(255,255,255,0.07)',
+              borderRadius: '10px',
+              padding: '16px 18px',
+              cursor: 'pointer',
+              textAlign: 'left',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              if (selectedServico?.id !== s.id) {
+                e.currentTarget.style.borderLeftWidth = '4px';
+                e.currentTarget.style.borderLeftColor = config.color;
+                e.currentTarget.style.background = `rgba(${config.color === '#C4622D' ? '196,98,45' : config.color === '#2E6B8A' ? '46,107,138' : '45,106,79'},0.07)`;
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (selectedServico?.id !== s.id) {
+                e.currentTarget.style.borderLeftWidth = '1px';
+                e.currentTarget.style.borderLeftColor = 'rgba(255,255,255,0.07)';
+                e.currentTarget.style.background = '#161B22';
+              }
+            }}
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-semibold text-gray-900">{s.name}</p>
-                <p className="text-sm text-gray-500">{s.duration_minutes} min</p>
-              </div>
-              <p className="text-lg font-bold text-green-700">
-                {s.price_cents > 0 ? `R$${(s.price_cents / 100).toFixed(0)}` : 'Grátis'}
-              </p>
+            <div>
+              <p style={{ fontWeight: 600, color: '#F0F0F0', margin: '0 0 3px', fontSize: '0.9375rem' }}>{s.name}</p>
+              <p style={{ fontSize: '0.8125rem', color: 'rgba(240,240,240,0.5)', margin: 0 }}>{s.duration_minutes} min</p>
             </div>
+            <p style={{ fontSize: '1.125rem', fontWeight: 700, color: config.color, margin: 0, flexShrink: 0 }}>
+              {s.price_cents > 0 ? `R$${(s.price_cents / 100).toFixed(0)}` : 'Grátis'}
+            </p>
           </button>
         ))}
       </div>
@@ -97,22 +164,36 @@ export default function AgendamentoPage() {
 
     // Step 1: Profissional
     <div key="profissional">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Escolha o profissional</h2>
-      <div className="grid gap-3">
-        <button
-          onClick={() => { setSelectedProfissional(null); setStep(2); }}
-          className="card text-left border-2 border-transparent hover:border-blue-400 transition"
-        >
-          <p className="font-semibold text-gray-900">Sem preferência</p>
-          <p className="text-sm text-gray-500">Qualquer profissional disponível</p>
-        </button>
-        {disponibilidade?.profissionais?.map((p) => (
+      <h2 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#F0F0F0', margin: '0 0 16px', letterSpacing: '-0.02em' }}>
+        Escolha o profissional
+      </h2>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {[{ id: null, name: 'Sem preferência', sub: 'Qualquer profissional disponível' },
+          ...(disponibilidade?.profissionais || []).map((p) => ({ id: p.id, name: p.name, sub: '' }))
+        ].map((p) => (
           <button
-            key={p.id}
-            onClick={() => { setSelectedProfissional(p); setStep(2); }}
-            className="card text-left border-2 border-transparent hover:border-blue-400 transition"
+            key={p.id ?? 'any'}
+            onClick={() => { setSelectedProfissional(p.id ? p : null); setStep(2); }}
+            style={{
+              background: '#161B22',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: '10px',
+              padding: '16px 18px',
+              cursor: 'pointer',
+              textAlign: 'left',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.border = `1px solid rgba(255,255,255,0.18)`;
+              e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.border = '1px solid rgba(255,255,255,0.07)';
+              e.currentTarget.style.background = '#161B22';
+            }}
           >
-            <p className="font-semibold text-gray-900">{p.name}</p>
+            <p style={{ fontWeight: 600, color: '#F0F0F0', margin: '0 0 2px', fontSize: '0.9375rem' }}>{p.name}</p>
+            {p.sub && <p style={{ fontSize: '0.8125rem', color: 'rgba(240,240,240,0.5)', margin: 0 }}>{p.sub}</p>}
           </button>
         ))}
       </div>
@@ -120,8 +201,12 @@ export default function AgendamentoPage() {
 
     // Step 2: Data/Hora
     <div key="dataHora">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Escolha data e horário</h2>
-      <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
+      <h2 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#F0F0F0', margin: '0 0 16px', letterSpacing: '-0.02em' }}>
+        Escolha data e horário
+      </h2>
+
+      {/* Calendar scroll */}
+      <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '20px' }}>
         {days.map((day) => {
           const d = format(day, 'yyyy-MM-dd');
           const isSelected = d === selectedDate;
@@ -129,38 +214,64 @@ export default function AgendamentoPage() {
             <button
               key={d}
               onClick={() => { setSelectedDate(d); setSelectedSlot(null); }}
-              className={`flex-shrink-0 px-3 py-2 rounded-xl text-center border-2 transition ${
-                isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-              }`}
+              style={{
+                flexShrink: 0,
+                padding: '10px 14px',
+                borderRadius: '10px',
+                textAlign: 'center',
+                border: isSelected ? `1px solid ${config.color}` : '1px solid rgba(255,255,255,0.08)',
+                background: isSelected ? `rgba(${config.color === '#C4622D' ? '196,98,45' : config.color === '#2E6B8A' ? '46,107,138' : '45,106,79'},0.15)` : 'rgba(255,255,255,0.04)',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+                minWidth: '52px',
+              }}
             >
-              <p className="text-xs text-gray-500">{format(day, 'EEE', { locale: ptBR })}</p>
-              <p className="font-bold text-gray-900">{format(day, 'd')}</p>
+              <p style={{ fontSize: '0.6875rem', color: isSelected ? config.color : 'rgba(240,240,240,0.5)', margin: '0 0 3px', textTransform: 'capitalize' }}>
+                {format(day, 'EEE', { locale: ptBR })}
+              </p>
+              <p style={{ fontWeight: 700, color: isSelected ? '#F0F0F0' : 'rgba(240,240,240,0.8)', margin: 0, fontSize: '1rem' }}>
+                {format(day, 'd')}
+              </p>
             </button>
           );
         })}
       </div>
-      <div className="grid grid-cols-4 gap-2">
+
+      {/* Time slots */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '20px' }}>
         {disponibilidade?.slots?.map((slot) => (
           <button
             key={slot}
             onClick={() => setSelectedSlot(slot)}
-            className={`py-2 rounded-lg text-sm font-medium border-2 transition ${
-              selectedSlot === slot
-                ? 'border-blue-500 bg-blue-50 text-blue-700'
-                : 'border-gray-200 hover:border-gray-300'
-            }`}
+            style={{
+              padding: '10px 6px',
+              borderRadius: '8px',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              border: selectedSlot === slot ? `1px solid ${config.color}` : '1px solid rgba(255,255,255,0.08)',
+              background: selectedSlot === slot
+                ? `rgba(${config.color === '#C4622D' ? '196,98,45' : config.color === '#2E6B8A' ? '46,107,138' : '45,106,79'},0.2)`
+                : 'rgba(255,255,255,0.04)',
+              color: selectedSlot === slot ? '#F0F0F0' : 'rgba(240,240,240,0.7)',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
           >
             {slot}
           </button>
         ))}
         {(!disponibilidade?.slots || disponibilidade.slots.length === 0) && (
-          <p className="col-span-4 text-gray-500 text-center py-8">Nenhum horário disponível nesta data.</p>
+          <p style={{ gridColumn: '1 / -1', color: 'rgba(240,240,240,0.4)', textAlign: 'center', padding: '32px 0', fontSize: '0.875rem' }}>
+            Nenhum horário disponível nesta data.
+          </p>
         )}
       </div>
+
       <button
         disabled={!selectedSlot}
         onClick={() => setStep(3)}
-        className="btn-primary mt-4 w-full justify-center py-3 disabled:opacity-50"
+        className="btn-primary"
+        style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: '0.9375rem' }}
       >
         Continuar
       </button>
@@ -168,37 +279,37 @@ export default function AgendamentoPage() {
 
     // Step 3: Dados cliente
     <div key="dados">
-      <h2 className="text-xl font-bold text-gray-900 mb-4">Seus dados</h2>
-      <form onSubmit={handleSubmit(handleClienteSubmit)} className="space-y-4">
+      <h2 style={{ fontSize: '1.125rem', fontWeight: 700, color: '#F0F0F0', margin: '0 0 20px', letterSpacing: '-0.02em' }}>
+        Seus dados
+      </h2>
+      <form onSubmit={handleSubmit(handleClienteSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo *</label>
-          <input
-            {...register('name')}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+          <label style={labelStyle}>Nome completo *</label>
+          <input {...register('name')} style={inputStyle} placeholder="João Silva" />
+          {errors.name && <p style={{ color: '#F87171', fontSize: '0.75rem', marginTop: '4px' }}>{errors.name.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Telefone / WhatsApp *</label>
-          <input
-            {...register('phone')}
-            placeholder="(99) 99999-9999"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          />
-          {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
+          <label style={labelStyle}>Telefone / WhatsApp *</label>
+          <input {...register('phone')} style={inputStyle} placeholder="(99) 99999-9999" />
+          {errors.phone && <p style={{ color: '#F87171', fontSize: '0.75rem', marginTop: '4px' }}>{errors.phone.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">E-mail (opcional)</label>
-          <input
-            {...register('email')}
-            type="email"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-          />
+          <label style={labelStyle}>E-mail (opcional)</label>
+          <input {...register('email')} type="email" style={inputStyle} placeholder="seu@email.com" />
         </div>
         <button
           type="submit"
           disabled={isPending}
-          className="btn-primary w-full justify-center py-3 text-base"
+          className="btn"
+          style={{
+            background: `linear-gradient(135deg, ${config.color}, ${config.colorDark})`,
+            color: '#F0F0F0',
+            width: '100%',
+            justifyContent: 'center',
+            padding: '13px',
+            fontSize: '0.9375rem',
+            marginTop: '4px',
+          }}
         >
           {isPending ? 'Agendando...' : 'Confirmar Agendamento'}
         </button>
@@ -207,43 +318,115 @@ export default function AgendamentoPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className={`${lojaInfo.color} text-white py-8 px-4`}>
-        <div className="max-w-lg mx-auto">
-          <div className="flex items-center gap-3 mb-1">
-            <span className="text-3xl">{lojaInfo.emoji}</span>
-            <h1 className="text-2xl font-bold">{lojaInfo.name}</h1>
+    <div style={{ minHeight: '100vh', background: '#0F1117' }}>
+      {/* Header com gradiente */}
+      <div style={{ background: `linear-gradient(135deg, ${config.color}, ${config.colorDark})`, padding: '32px 24px' }}>
+        <div style={{ maxWidth: '540px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'rgba(255,255,255,0.9)',
+              flexShrink: 0,
+            }}>
+              <Icon />
+            </div>
+            <h1 style={{ fontSize: '1.375rem', fontWeight: 700, letterSpacing: '-0.02em', color: '#F0F0F0', margin: 0 }}>
+              {config.name}
+            </h1>
           </div>
-          <p className="text-white/80 text-sm">Agendar serviço</p>
+          <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.65)', margin: '6px 0 0 52px' }}>
+            Agendar serviço
+          </p>
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-6">
-        <div className="flex items-center gap-1 mb-6">
+      <div style={{ maxWidth: '540px', margin: '0 auto', padding: '28px 24px' }}>
+        {/* Stepper */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '28px' }}>
           {STEPS.map((s, i) => (
-            <div key={s} className="flex items-center flex-1">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition ${
-                i <= step ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-400'
-              }`}>
+            <div key={s} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                flexShrink: 0,
+                background: i < step
+                  ? config.color
+                  : i === step
+                    ? config.color
+                    : 'rgba(255,255,255,0.07)',
+                color: i <= step ? '#F0F0F0' : 'rgba(240,240,240,0.25)',
+                boxShadow: i === step ? `0 0 12px ${config.color}60` : 'none',
+                transition: 'all 0.2s',
+                opacity: i > step ? 0.4 : 1,
+              }}>
                 {i < step ? '✓' : i + 1}
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`flex-1 h-0.5 mx-1 transition ${i < step ? 'bg-blue-600' : 'bg-gray-200'}`} />
+                <div style={{
+                  flex: 1,
+                  height: '2px',
+                  margin: '0 4px',
+                  background: i < step ? config.color : 'rgba(255,255,255,0.07)',
+                  borderRadius: '1px',
+                  transition: 'background 0.2s',
+                }} />
               )}
             </div>
           ))}
         </div>
 
+        {/* Selection summary */}
         {selectedServico && step > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4 text-sm">
-            <span className="font-semibold">{selectedServico.name}</span>
-            {selectedProfissional && <span className="text-gray-600"> • {selectedProfissional.name}</span>}
-            {selectedSlot && <span className="text-blue-700 font-medium"> • {selectedDate} às {selectedSlot}</span>}
+          <div style={{
+            background: `rgba(${config.color === '#C4622D' ? '196,98,45' : config.color === '#2E6B8A' ? '46,107,138' : '45,106,79'},0.1)`,
+            border: `1px solid rgba(${config.color === '#C4622D' ? '196,98,45' : config.color === '#2E6B8A' ? '46,107,138' : '45,106,79'},0.2)`,
+            borderRadius: '10px',
+            padding: '12px 16px',
+            marginBottom: '16px',
+            fontSize: '0.875rem',
+          }}>
+            <span style={{ fontWeight: 600, color: '#F0F0F0' }}>{selectedServico.name}</span>
+            {selectedProfissional && (
+              <span style={{ color: 'rgba(240,240,240,0.6)' }}> · {selectedProfissional.name}</span>
+            )}
+            {selectedSlot && (
+              <span style={{ color: config.color, fontWeight: 500 }}> · {selectedDate} às {selectedSlot}</span>
+            )}
           </div>
         )}
 
+        {/* Back link */}
         {step > 0 && (
-          <button onClick={() => setStep(step - 1)} className="text-sm text-gray-500 hover:text-gray-700 mb-4 flex items-center gap-1">
+          <button
+            onClick={() => setStep(step - 1)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'rgba(240,240,240,0.45)',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              padding: '0 0 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontFamily: 'inherit',
+              transition: 'color 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(240,240,240,0.8)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(240,240,240,0.45)'; }}
+          >
             ← Voltar
           </button>
         )}

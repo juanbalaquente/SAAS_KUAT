@@ -3,9 +3,9 @@ import Layout from '../components/Layout';
 import api from '../services/api';
 
 const BOX_STATUS = {
-  livre: { label: 'Livre', color: 'border-green-400 bg-green-50', dot: 'bg-green-500' },
-  ocupado: { label: 'Ocupado', color: 'border-yellow-400 bg-yellow-50', dot: 'bg-yellow-500' },
-  manutencao: { label: 'Manutenção', color: 'border-red-400 bg-red-50', dot: 'bg-red-500' },
+  livre:      { label: 'Livre',      border: 'rgba(34,197,94,0.3)',    bg: 'rgba(34,197,94,0.07)',    dot: '#4ADE80' },
+  ocupado:    { label: 'Ocupado',    border: 'rgba(46,107,138,0.45)',  bg: 'rgba(46,107,138,0.12)',   dot: '#60B8D8' },
+  manutencao: { label: 'Manutenção', border: 'rgba(239,68,68,0.3)',    bg: 'rgba(239,68,68,0.07)',    dot: '#F87171' },
 };
 
 function BoxCard({ box, onUpdate }) {
@@ -13,28 +13,58 @@ function BoxCard({ box, onUpdate }) {
   const ag = box.agendamento;
 
   return (
-    <div className={`card border-2 ${st.color} flex flex-col gap-3`}>
-      <div className="flex items-center justify-between">
-        <h3 className="font-bold text-lg text-gray-900">Box {box.numero}</h3>
-        <span className="flex items-center gap-1.5 text-sm font-medium">
-          <span className={`w-2.5 h-2.5 rounded-full ${st.dot}`} />
+    <div
+      className="card"
+      style={{
+        border: `1px solid ${st.border}`,
+        background: st.bg,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        padding: '20px',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#F0F0F0', margin: 0, letterSpacing: '-0.01em' }}>
+          Box {box.numero}
+        </h3>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8125rem', fontWeight: 500, color: 'rgba(240,240,240,0.7)' }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: st.dot, flexShrink: 0 }} />
           {st.label}
         </span>
       </div>
 
       {ag && (
-        <div className="text-sm text-gray-600 border-t border-gray-100 pt-3">
-          <p className="font-medium text-gray-900">{ag.cliente?.name}</p>
-          <p>{ag.servico?.name}</p>
-          {ag.veiculo_placa && <p className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded inline-block mt-1">{ag.veiculo_placa}</p>}
+        <div style={{
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          paddingTop: '12px',
+          fontSize: '0.875rem',
+          color: 'rgba(240,240,240,0.6)',
+        }}>
+          <p style={{ fontWeight: 600, color: '#F0F0F0', margin: '0 0 3px' }}>{ag.cliente?.name}</p>
+          <p style={{ margin: '0 0 6px' }}>{ag.servico?.name}</p>
+          {ag.veiculo_placa && (
+            <span style={{
+              fontFamily: 'monospace',
+              fontSize: '0.75rem',
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              padding: '2px 8px',
+              borderRadius: '4px',
+              color: 'rgba(240,240,240,0.75)',
+            }}>
+              {ag.veiculo_placa}
+            </span>
+          )}
         </div>
       )}
 
-      <div className="flex gap-2 mt-auto">
+      <div style={{ display: 'flex', gap: '8px', marginTop: 'auto' }}>
         {box.status === 'livre' && (
           <button
             onClick={() => onUpdate(box.id, 'ocupado')}
-            className="btn btn-primary text-xs py-1.5 flex-1"
+            className="btn"
+            style={{ background: 'linear-gradient(135deg, #2E6B8A, #1F4E6B)', color: '#F0F0F0', flex: 1, justifyContent: 'center', fontSize: '0.8125rem', padding: '7px 10px' }}
           >
             Ocupar
           </button>
@@ -43,13 +73,15 @@ function BoxCard({ box, onUpdate }) {
           <>
             <button
               onClick={() => onUpdate(box.id, 'livre')}
-              className="btn btn-success text-xs py-1.5 flex-1"
+              className="btn-success"
+              style={{ flex: 1, justifyContent: 'center', fontSize: '0.8125rem', padding: '7px 10px' }}
             >
               ✓ Concluir
             </button>
             <button
               onClick={() => onUpdate(box.id, 'manutencao')}
-              className="btn btn-danger text-xs py-1.5"
+              className="btn-danger"
+              style={{ fontSize: '0.8125rem', padding: '7px 12px' }}
             >
               ⚠
             </button>
@@ -58,7 +90,8 @@ function BoxCard({ box, onUpdate }) {
         {box.status === 'manutencao' && (
           <button
             onClick={() => onUpdate(box.id, 'livre')}
-            className="btn btn-secondary text-xs py-1.5 flex-1"
+            className="btn-secondary"
+            style={{ flex: 1, justifyContent: 'center', fontSize: '0.8125rem', padding: '7px 10px' }}
           >
             Liberar
           </button>
@@ -88,66 +121,87 @@ export default function LavaJatoPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['lava-boxes'] }),
   });
 
-  const livres = boxes?.filter((b) => b.status === 'livre').length ?? 0;
+  const livres   = boxes?.filter((b) => b.status === 'livre').length ?? 0;
   const ocupados = boxes?.filter((b) => b.status === 'ocupado').length ?? 0;
+
+  const statCards = [
+    { label: 'Boxes Livres',  value: livres,             color: '#4ADE80' },
+    { label: 'Em Lavagem',    value: ocupados,           color: '#60B8D8' },
+    { label: 'Total de Boxes',value: boxes?.length ?? 0, color: 'rgba(240,240,240,0.7)' },
+  ];
+
+  const filaEspera = agenda?.filter((a) => ['pendente', 'confirmado'].includes(a.status)) || [];
 
   return (
     <Layout>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">🚗 Lava Kuat</h1>
-        <p className="text-gray-500 mt-1">Atualização automática a cada 30s</p>
+      {/* Header */}
+      <div style={{ marginBottom: '28px' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#F0F0F0', margin: '0 0 6px', letterSpacing: '-0.02em' }}>
+          Lava Kuat
+        </h1>
+        <p style={{ fontSize: '0.875rem', color: 'rgba(240,240,240,0.45)', margin: 0 }}>
+          Atualização automática a cada 30s
+        </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="card text-center">
-          <p className="text-3xl font-bold text-green-600">{livres}</p>
-          <p className="text-sm text-gray-600 mt-1">Boxes Livres</p>
-        </div>
-        <div className="card text-center">
-          <p className="text-3xl font-bold text-yellow-600">{ocupados}</p>
-          <p className="text-sm text-gray-600 mt-1">Em Lavagem</p>
-        </div>
-        <div className="card text-center">
-          <p className="text-3xl font-bold text-gray-600">{boxes?.length ?? 0}</p>
-          <p className="text-sm text-gray-600 mt-1">Total de Boxes</p>
-        </div>
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '28px' }}>
+        {statCards.map((s) => (
+          <div key={s.label} className="card" style={{ textAlign: 'center', padding: '20px' }}>
+            <p style={{ fontSize: '2rem', fontWeight: 700, color: s.color, margin: '0 0 6px', letterSpacing: '-0.03em' }}>
+              {s.value}
+            </p>
+            <p style={{ fontSize: '0.8125rem', color: 'rgba(240,240,240,0.5)', margin: 0 }}>{s.label}</p>
+          </div>
+        ))}
       </div>
 
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Boxes</h2>
+      {/* Boxes */}
+      <p className="section-label">Boxes</p>
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '28px' }}>
           {[1, 2, 3].map((i) => (
-            <div key={i} className="card animate-pulse h-40" />
+            <div key={i} className="card animate-pulse" style={{ height: '140px' }} />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '28px' }}>
           {boxes?.map((box) => (
             <BoxCard key={box.id} box={box} onUpdate={(id, status) => updateBox({ id, status })} />
           ))}
         </div>
       )}
 
-      {agenda && agenda.filter((a) => ['pendente', 'confirmado'].includes(a.status)).length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Fila de Espera</h2>
-          <div className="space-y-3">
-            {agenda
-              .filter((a) => ['pendente', 'confirmado'].includes(a.status))
-              .map((ag) => (
-                <div key={ag.id} className="card flex items-center gap-4">
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900">{ag.cliente?.name}</p>
-                    <p className="text-sm text-gray-500">{ag.servico?.name}</p>
-                    {ag.veiculo_placa && (
-                      <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">{ag.veiculo_placa}</span>
-                    )}
-                  </div>
-                  <p className="text-sm font-medium text-gray-700">
-                    {new Date(ag.scheduled_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
+      {/* Fila de espera */}
+      {filaEspera.length > 0 && (
+        <div>
+          <p className="section-label">Fila de espera ({filaEspera.length})</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {filaEspera.map((ag) => (
+              <div key={ag.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px' }}>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontWeight: 600, color: '#F0F0F0', margin: '0 0 3px', fontSize: '0.9375rem' }}>{ag.cliente?.name}</p>
+                  <p style={{ fontSize: '0.8125rem', color: 'rgba(240,240,240,0.5)', margin: 0 }}>{ag.servico?.name}</p>
+                  {ag.veiculo_placa && (
+                    <span style={{
+                      fontFamily: 'monospace',
+                      fontSize: '0.75rem',
+                      background: 'rgba(255,255,255,0.08)',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      color: 'rgba(240,240,240,0.65)',
+                      display: 'inline-block',
+                      marginTop: '4px',
+                    }}>
+                      {ag.veiculo_placa}
+                    </span>
+                  )}
                 </div>
-              ))}
+                <p style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'rgba(240,240,240,0.65)', flexShrink: 0 }}>
+                  {new Date(ag.scheduled_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       )}

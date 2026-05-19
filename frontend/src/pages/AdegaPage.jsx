@@ -5,12 +5,15 @@ import api from '../services/api';
 import PDVModal from '../components/PDVModal';
 
 const PEDIDO_STATUS = {
-  aguardando: { label: 'Aguardando', color: 'bg-gray-100 text-gray-700' },
-  preparando: { label: 'Preparando', color: 'bg-yellow-100 text-yellow-700' },
-  em_rota: { label: 'Em Rota', color: 'bg-blue-100 text-blue-700' },
-  entregue: { label: 'Entregue', color: 'bg-green-100 text-green-700' },
-  cancelado: { label: 'Cancelado', color: 'bg-red-100 text-red-700' },
+  aguardando: { label: 'Aguardando', bg: 'rgba(255,255,255,0.08)',    color: 'rgba(240,240,240,0.6)' },
+  preparando: { label: 'Preparando', bg: 'rgba(245,158,11,0.15)',     color: '#FCD34D' },
+  em_rota:    { label: 'Em Rota',    bg: 'rgba(59,130,246,0.15)',     color: '#93C5FD' },
+  entregue:   { label: 'Entregue',   bg: 'rgba(34,197,94,0.15)',      color: '#4ADE80' },
+  cancelado:  { label: 'Cancelado',  bg: 'rgba(239,68,68,0.15)',      color: '#F87171' },
 };
+
+const NEXT_STATUS = { aguardando: 'preparando', preparando: 'em_rota', em_rota: 'entregue' };
+const NEXT_LABEL  = { aguardando: 'Iniciar Preparo', preparando: 'Saiu para Entrega', em_rota: 'Marcar Entregue' };
 
 export default function AdegaPage() {
   const [pdvOpen, setPdvOpen] = useState(false);
@@ -33,75 +36,104 @@ export default function AdegaPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['pedidos'] }),
   });
 
-  const statusOrder = ['aguardando', 'preparando', 'em_rota'];
-  const pedidosAtivos = pedidos?.filter((p) => statusOrder.includes(p.status)) || [];
+  const pedidosAtivos = pedidos?.filter((p) => ['aguardando', 'preparando', 'em_rota'].includes(p.status)) || [];
 
   return (
     <Layout>
-      <div className="mb-6 flex items-center justify-between">
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px', gap: '16px' }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">🍷 Adega R1</h1>
-          <p className="text-gray-500 mt-1">Vendas e entregas</p>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#F0F0F0', margin: '0 0 6px', letterSpacing: '-0.02em' }}>
+            Adega R1
+          </h1>
+          <p style={{ fontSize: '0.875rem', color: 'rgba(240,240,240,0.45)', margin: 0 }}>Vendas e entregas</p>
         </div>
-        <button onClick={() => setPdvOpen(true)} className="btn-primary text-base px-6 py-3">
-          💳 Abrir PDV
+        <button
+          onClick={() => setPdvOpen(true)}
+          className="btn"
+          style={{ background: 'linear-gradient(135deg, #2D6A4F, #1F4E38)', color: '#F0F0F0', padding: '10px 20px', fontSize: '0.9375rem', flexShrink: 0 }}
+        >
+          Abrir PDV
         </button>
       </div>
 
+      {/* Alertas de estoque */}
       {alertas && alertas.length > 0 && (
-        <div className="mb-6">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-            <h3 className="font-semibold text-red-800 mb-2">⚠️ Alertas de Estoque ({alertas.length})</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {alertas.map((p) => (
-                <div key={p.id} className="bg-white border border-red-100 rounded-lg px-3 py-2">
-                  <p className="text-sm font-medium text-gray-900 truncate">{p.nome}</p>
-                  <p className="text-xs text-red-600">
-                    Estoque: {p.estoque_atual} (mín: {p.estoque_minimo})
-                  </p>
-                </div>
-              ))}
-            </div>
+        <div style={{
+          background: 'rgba(239,68,68,0.07)',
+          border: '1px solid rgba(239,68,68,0.2)',
+          borderRadius: '12px',
+          padding: '18px 20px',
+          marginBottom: '24px',
+        }}>
+          <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#F87171', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span>⚠</span> Alertas de Estoque ({alertas.length})
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '8px' }}>
+            {alertas.map((p) => (
+              <div key={p.id} style={{
+                background: '#161B22',
+                border: '1px solid rgba(239,68,68,0.15)',
+                borderRadius: '8px',
+                padding: '10px 12px',
+              }}>
+                <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#F0F0F0', margin: '0 0 3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {p.nome}
+                </p>
+                <p style={{ fontSize: '0.75rem', color: '#F87171', margin: 0 }}>
+                  Estoque: {p.estoque_atual} (mín: {p.estoque_minimo})
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-        Pedidos Ativos ({pedidosAtivos.length})
-      </h2>
+      {/* Pedidos ativos */}
+      <p className="section-label">Pedidos Ativos ({pedidosAtivos.length})</p>
+
       {pedidosAtivos.length === 0 ? (
-        <div className="card text-center text-gray-500 py-12">
+        <div className="card" style={{ textAlign: 'center', color: 'rgba(240,240,240,0.4)', padding: '48px 24px' }}>
           Nenhum pedido ativo no momento.
         </div>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {pedidosAtivos.map((pedido) => {
             const st = PEDIDO_STATUS[pedido.status] || PEDIDO_STATUS.aguardando;
-            const nextStatus = { aguardando: 'preparando', preparando: 'em_rota', em_rota: 'entregue' };
-            const nextLabel = { aguardando: 'Iniciar Preparo', preparando: 'Saiu para Entrega', em_rota: 'Marcar Entregue' };
+            const isDelivery = pedido.tipo === 'delivery';
 
             return (
-              <div key={pedido.id} className="card flex items-center gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`badge ${pedido.tipo === 'delivery' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}`}>
-                      {pedido.tipo === 'delivery' ? '🛵 Delivery' : '🏪 Balcão'}
+              <div key={pedido.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <span
+                      className="badge"
+                      style={{
+                        background: isDelivery ? 'rgba(168,85,247,0.15)' : 'rgba(255,255,255,0.08)',
+                        color: isDelivery ? '#C084FC' : 'rgba(240,240,240,0.6)',
+                      }}
+                    >
+                      {isDelivery ? '🛵 Delivery' : '🏪 Balcão'}
                     </span>
-                    <span className={`badge ${st.color}`}>{st.label}</span>
+                    <span className="badge" style={{ background: st.bg, color: st.color }}>{st.label}</span>
                   </div>
-                  <p className="font-semibold text-gray-900">
-                    {pedido.cliente?.name || 'Cliente avulso'} — R${(pedido.total_cents / 100).toFixed(2)}
+                  <p style={{ fontWeight: 600, color: '#F0F0F0', margin: '0 0 2px', fontSize: '0.9375rem', letterSpacing: '-0.01em' }}>
+                    {pedido.cliente?.name || 'Cliente avulso'}
+                    <span style={{ fontWeight: 400, color: 'rgba(240,240,240,0.55)', marginLeft: '8px', fontSize: '0.875rem' }}>
+                      R${(pedido.total_cents / 100).toFixed(2)}
+                    </span>
                   </p>
                   {pedido.endereco_entrega && (
-                    <p className="text-sm text-gray-500">{pedido.endereco_entrega}</p>
+                    <p style={{ fontSize: '0.8125rem', color: 'rgba(240,240,240,0.45)', margin: 0 }}>{pedido.endereco_entrega}</p>
                   )}
                 </div>
-                {nextStatus[pedido.status] && (
+                {NEXT_STATUS[pedido.status] && (
                   <button
-                    onClick={() => updatePedido({ id: pedido.id, status: nextStatus[pedido.status] })}
-                    className="btn-primary text-sm py-1.5"
+                    onClick={() => updatePedido({ id: pedido.id, status: NEXT_STATUS[pedido.status] })}
+                    className="btn"
+                    style={{ background: 'linear-gradient(135deg, #2D6A4F, #1F4E38)', color: '#F0F0F0', fontSize: '0.8125rem', padding: '7px 14px', flexShrink: 0 }}
                   >
-                    {nextLabel[pedido.status]}
+                    {NEXT_LABEL[pedido.status]}
                   </button>
                 )}
               </div>

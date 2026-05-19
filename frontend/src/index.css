@@ -1,34 +1,230 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    --bg: #0F1117;
+    --surface: #161B22;
+    --surface-2: #1C2330;
+    --border: rgba(255, 255, 255, 0.07);
+    --border-hover: rgba(255, 255, 255, 0.15);
+    --text: #F0F0F0;
+    --text-muted: rgba(240, 240, 240, 0.55);
+    --text-subtle: rgba(240, 240, 240, 0.35);
+
+    --barbearia: #C4622D;
+    --barbearia-dark: #9C4A1F;
+    --lavajato: #2E6B8A;
+    --lavajato-dark: #1F4E6B;
+    --adega: #2D6A4F;
+    --adega-dark: #1F4E38;
+  }
+
   body {
     margin: 0;
-    background-color: #f9fafb;
-    color: #111827;
-    font-family: ui-sans-serif, system-ui, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
   }
 }
 
 @layer components {
+  /* ── Base button ─────────────────────────────────────── */
   .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 cursor-pointer inline-flex items-center gap-2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-decoration: none;
+    white-space: nowrap;
+    font-family: inherit;
   }
+
+  /* ── Primary button (blue) ───────────────────────────── */
   .btn-primary {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 cursor-pointer inline-flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    background: linear-gradient(135deg, #3B82F6, #2563EB);
+    color: #F0F0F0;
+    text-decoration: none;
+    white-space: nowrap;
+    font-family: inherit;
   }
+  .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563EB, #1D4ED8);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.35);
+    transform: translateY(-1px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* ── Secondary button (ghost) ───────────────────────── */
   .btn-secondary {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 cursor-pointer inline-flex items-center gap-2 bg-gray-200 text-gray-800 hover:bg-gray-300;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.07);
+    color: rgba(240, 240, 240, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-decoration: none;
+    white-space: nowrap;
+    font-family: inherit;
   }
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* ── Danger button (red) ─────────────────────────────── */
   .btn-danger {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 cursor-pointer inline-flex items-center gap-2 bg-red-600 text-white hover:bg-red-700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    color: #F0F0F0;
+    text-decoration: none;
+    white-space: nowrap;
+    font-family: inherit;
   }
+  .btn-danger:hover:not(:disabled) {
+    background: linear-gradient(135deg, #DC2626, #B91C1C);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+    transform: translateY(-1px);
+  }
+  .btn-danger:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* ── Success button (green) ─────────────────────────── */
   .btn-success {
-    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 cursor-pointer inline-flex items-center gap-2 bg-green-600 text-white hover:bg-green-700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    background: linear-gradient(135deg, #22C55E, #16A34A);
+    color: #F0F0F0;
+    text-decoration: none;
+    white-space: nowrap;
+    font-family: inherit;
   }
+  .btn-success:hover {
+    background: linear-gradient(135deg, #16A34A, #15803D);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+    transform: translateY(-1px);
+  }
+
+  /* ── Card ────────────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+    background-color: #161B22;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 20px 40px rgba(0, 0, 0, 0.15);
   }
+
+  /* ── Badge ───────────────────────────────────────────── */
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* ── Input ───────────────────────────────────────────── */
+  .input {
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #F0F0F0;
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .input::placeholder {
+    color: rgba(240, 240, 240, 0.3);
+  }
+  .input:focus {
+    border-color: rgba(59, 130, 246, 0.55);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* ── Section label ───────────────────────────────────── */
+  .section-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(240, 240, 240, 0.4);
+    margin-bottom: 12px;
   }
 }

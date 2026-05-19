@@ -10,10 +10,10 @@ const redirectMap = {
 };
 
 const demoUsers = [
-  { name: 'Carlos (Dono)', email: 'carlos@saaskuat.com', password: 'kuat@2024', color: 'bg-blue-600' },
-  { name: 'Rafael (Barbeiro)', email: 'rafael@saaskuat.com', password: 'kuat@2024', color: 'bg-orange-500' },
-  { name: 'Diego (Lava Kuat)', email: 'diego@saaskuat.com', password: 'kuat@2024', color: 'bg-yellow-500' },
-  { name: 'Marcos (Adega)', email: 'marcos@saaskuat.com', password: 'kuat@2024', color: 'bg-green-600' },
+  { name: 'Carlos (Dono)', email: 'carlos@saaskuat.com', password: 'kuat@2024', gradient: 'linear-gradient(135deg, #3B82F6, #2563EB)' },
+  { name: 'Rafael (Barbeiro)', email: 'rafael@saaskuat.com', password: 'kuat@2024', gradient: 'linear-gradient(135deg, #C4622D, #9C4A1F)' },
+  { name: 'Diego (Lava Kuat)', email: 'diego@saaskuat.com', password: 'kuat@2024', gradient: 'linear-gradient(135deg, #2E6B8A, #1F4E6B)' },
+  { name: 'Marcos (Adega)', email: 'marcos@saaskuat.com', password: 'kuat@2024', gradient: 'linear-gradient(135deg, #2D6A4F, #1F4E38)' },
 ];
 
 export default function LoginPage() {
@@ -41,42 +41,102 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">SAAS Kuat</h1>
-          <p className="text-gray-400">Sistema de Gestão Multi-Loja</p>
+    <div style={{
+      minHeight: '100vh',
+      background: '#0F1117',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px',
+    }}>
+      <div style={{ width: '100%', maxWidth: '420px' }}>
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+          <h1 style={{
+            fontSize: '2.25rem',
+            fontWeight: 800,
+            letterSpacing: '-0.03em',
+            color: '#F0F0F0',
+            margin: '0 0 8px',
+          }}>
+            SAAS Kuat
+          </h1>
+          <p style={{
+            fontSize: '0.9375rem',
+            fontWeight: 300,
+            color: 'rgba(240,240,240,0.45)',
+          }}>
+            Sistema de Gestão Multi-Loja
+          </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6">Entrar</h2>
+        {/* Card */}
+        <div style={{
+          background: '#161B22',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: '16px',
+          padding: '40px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.4), 0 20px 40px rgba(0,0,0,0.3)',
+        }}>
+          <h2 style={{
+            fontSize: '1.0625rem',
+            fontWeight: 600,
+            color: '#F0F0F0',
+            margin: '0 0 28px',
+          }}>
+            Entrar
+          </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+              <label style={{
+                display: 'block',
+                fontSize: '0.8125rem',
+                fontWeight: 500,
+                color: 'rgba(240,240,240,0.65)',
+                marginBottom: '6px',
+              }}>
+                E-mail
+              </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="input"
                 placeholder="seu@email.com"
                 required
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+              <label style={{
+                display: 'block',
+                fontSize: '0.8125rem',
+                fontWeight: 500,
+                color: 'rgba(240,240,240,0.65)',
+                marginBottom: '6px',
+              }}>
+                Senha
+              </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                className="input"
                 placeholder="••••••••"
                 required
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm">
+              <div style={{
+                background: 'rgba(239,68,68,0.1)',
+                border: '1px solid rgba(239,68,68,0.25)',
+                color: '#F87171',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                fontSize: '0.8125rem',
+              }}>
                 {error}
               </div>
             )}
@@ -84,25 +144,47 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary justify-center py-3 text-base"
+              className="btn-primary"
+              style={{ justifyContent: 'center', padding: '13px', fontSize: '0.9375rem', marginTop: '4px' }}
             >
               {loading ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
 
-          <div className="mt-6">
-            <p className="text-xs text-gray-500 text-center mb-3">Acesso rápido — Demo</p>
-            <div className="grid grid-cols-2 gap-2">
-              {demoUsers.map((u) => (
-                <button
-                  key={u.email}
-                  onClick={() => fillDemo(u)}
-                  className={`${u.color} text-white text-xs px-3 py-2 rounded-lg hover:opacity-90 transition font-medium`}
-                >
-                  {u.name}
-                </button>
-              ))}
-            </div>
+          {/* Divider */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            margin: '28px 0 16px',
+          }}>
+            <div style={{ flex: 1, borderTop: '1px solid rgba(255,255,255,0.08)' }} />
+            <span style={{ fontSize: '0.75rem', color: 'rgba(240,240,240,0.3)', whiteSpace: 'nowrap' }}>
+              Acesso rápido — Demo
+            </span>
+            <div style={{ flex: 1, borderTop: '1px solid rgba(255,255,255,0.08)' }} />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            {demoUsers.map((u) => (
+              <button
+                key={u.email}
+                onClick={() => fillDemo(u)}
+                className="btn"
+                style={{
+                  background: u.gradient,
+                  color: '#F0F0F0',
+                  fontSize: '0.75rem',
+                  padding: '9px 10px',
+                  justifyContent: 'center',
+                  transition: 'opacity 0.2s, transform 0.2s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.82'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; }}
+              >
+                {u.name}
+              </button>
+            ))}
           </div>
         </div>
       </div>

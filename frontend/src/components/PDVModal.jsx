@@ -5,11 +5,11 @@ import api from '../services/api';
 const PAGAMENTOS = ['Dinheiro', 'Cartão Débito', 'Cartão Crédito', 'PIX'];
 
 export default function PDVModal({ onClose }) {
-  const [search, setSearch] = useState('');
-  const [cart, setCart] = useState([]);
+  const [search,    setSearch]    = useState('');
+  const [cart,      setCart]      = useState([]);
   const [pagamento, setPagamento] = useState('PIX');
-  const [tipo, setTipo] = useState('balcao');
-  const [success, setSuccess] = useState(false);
+  const [tipo,      setTipo]      = useState('balcao');
+  const [success,   setSuccess]   = useState(false);
 
   const { data: produtos } = useQuery({
     queryKey: ['produtos'],
@@ -50,98 +50,233 @@ export default function PDVModal({ onClose }) {
     });
   };
 
+  const qtyBtnStyle = {
+    width: '28px',
+    height: '28px',
+    borderRadius: '6px',
+    border: '1px solid rgba(255,255,255,0.1)',
+    background: 'rgba(255,255,255,0.06)',
+    color: 'rgba(240,240,240,0.75)',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '1rem',
+    fontFamily: 'inherit',
+    transition: 'background 0.15s',
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-900">💳 PDV — Adega R1</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+      <div style={{
+        background: '#161B22',
+        border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: '16px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+        width: '100%',
+        maxWidth: '900px',
+        maxHeight: '90vh',
+        display: 'flex',
+        flexDirection: 'column',
+      }}>
+        {/* Modal header */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '20px 24px',
+          borderBottom: '1px solid rgba(255,255,255,0.07)',
+        }}>
+          <h2 style={{ fontSize: '1.0625rem', fontWeight: 600, color: '#F0F0F0', margin: 0, letterSpacing: '-0.01em' }}>
+            PDV — Adega R1
+          </h2>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'rgba(240,240,240,0.4)',
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              lineHeight: 1,
+              padding: '4px',
+              transition: 'color 0.15s',
+              fontFamily: 'inherit',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(240,240,240,0.8)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(240,240,240,0.4)'; }}
+          >
+            ×
+          </button>
         </div>
 
         {success ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-6xl mb-4">✅</p>
-              <p className="text-xl font-bold text-green-700">Venda finalizada!</p>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '12px' }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              background: 'rgba(34,197,94,0.1)',
+              border: '1px solid rgba(34,197,94,0.25)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '1.75rem',
+            }}>
+              ✓
             </div>
+            <p style={{ fontSize: '1.125rem', fontWeight: 700, color: '#4ADE80' }}>Venda finalizada!</p>
           </div>
         ) : (
-          <div className="flex flex-1 overflow-hidden">
-            <div className="flex-1 p-6 overflow-y-auto border-r">
+          <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+            {/* Left: product catalog */}
+            <div style={{ flex: 1, padding: '20px', overflowY: 'auto', borderRight: '1px solid rgba(255,255,255,0.07)' }}>
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar produto ou código de barras..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="input"
+                style={{ marginBottom: '16px' }}
                 autoFocus
               />
-              <div className="grid grid-cols-2 gap-2">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
                 {filtered.slice(0, 20).map((p) => (
                   <button
                     key={p.id}
                     onClick={() => addToCart(p)}
-                    className="text-left p-3 border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition"
+                    style={{
+                      textAlign: 'left',
+                      padding: '12px 14px',
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.07)',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                      fontFamily: 'inherit',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.border = '1px solid rgba(45,106,79,0.5)';
+                      e.currentTarget.style.background = 'rgba(45,106,79,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.border = '1px solid rgba(255,255,255,0.07)';
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                    }}
                   >
-                    <p className="font-medium text-gray-900 text-sm">{p.nome}</p>
-                    <p className="text-green-700 font-semibold text-sm">R${(p.preco_cents / 100).toFixed(2)}</p>
-                    <p className="text-xs text-gray-400">Estoque: {p.estoque_atual}</p>
+                    <p style={{ fontWeight: 500, color: '#F0F0F0', fontSize: '0.875rem', margin: '0 0 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {p.nome}
+                    </p>
+                    <p style={{ fontWeight: 700, color: '#4ADE80', fontSize: '0.875rem', margin: '0 0 3px' }}>
+                      R${(p.preco_cents / 100).toFixed(2)}
+                    </p>
+                    <p style={{ fontSize: '0.75rem', color: 'rgba(240,240,240,0.35)', margin: 0 }}>
+                      Estoque: {p.estoque_atual}
+                    </p>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="w-80 p-6 flex flex-col">
-              <h3 className="font-semibold text-gray-700 mb-3">Carrinho</h3>
-              <div className="flex-1 overflow-y-auto space-y-2 mb-4">
+            {/* Right: cart + checkout */}
+            <div style={{ width: '300px', padding: '20px', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+              <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'rgba(240,240,240,0.5)', margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Carrinho
+              </p>
+
+              <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
                 {cart.length === 0 ? (
-                  <p className="text-gray-400 text-sm text-center mt-8">Nenhum item adicionado</p>
+                  <p style={{ color: 'rgba(240,240,240,0.3)', fontSize: '0.875rem', textAlign: 'center', marginTop: '32px' }}>
+                    Nenhum item adicionado
+                  </p>
                 ) : (
                   cart.map((item) => (
-                    <div key={item.id} className="flex items-center gap-2">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{item.nome}</p>
-                        <p className="text-xs text-gray-500">R${(item.preco_cents / 100).toFixed(2)} un</p>
+                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ fontSize: '0.8125rem', fontWeight: 500, color: '#F0F0F0', margin: '0 0 2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {item.nome}
+                        </p>
+                        <p style={{ fontSize: '0.75rem', color: 'rgba(240,240,240,0.4)', margin: 0 }}>
+                          R${(item.preco_cents / 100).toFixed(2)} un
+                        </p>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <button onClick={() => setQty(item.id, item.qty - 1)} className="w-7 h-7 rounded border text-gray-600 hover:bg-gray-100 flex items-center justify-center">-</button>
-                        <span className="w-8 text-center text-sm font-medium">{item.qty}</span>
-                        <button onClick={() => setQty(item.id, item.qty + 1)} className="w-7 h-7 rounded border text-gray-600 hover:bg-gray-100 flex items-center justify-center">+</button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <button style={qtyBtnStyle} onClick={() => setQty(item.id, item.qty - 1)}>−</button>
+                        <span style={{ width: '28px', textAlign: 'center', fontSize: '0.875rem', fontWeight: 600, color: '#F0F0F0' }}>{item.qty}</span>
+                        <button style={qtyBtnStyle} onClick={() => setQty(item.id, item.qty + 1)}>+</button>
                       </div>
-                      <button onClick={() => removeFromCart(item.id)} className="text-red-400 hover:text-red-600 text-lg leading-none">&times;</button>
+                      <button
+                        onClick={() => removeFromCart(item.id)}
+                        style={{ background: 'none', border: 'none', color: 'rgba(240,240,240,0.3)', cursor: 'pointer', fontSize: '1.125rem', lineHeight: 1, padding: '2px', transition: 'color 0.15s', fontFamily: 'inherit' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.color = '#F87171'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(240,240,240,0.3)'; }}
+                      >
+                        ×
+                      </button>
                     </div>
                   ))
                 )}
               </div>
 
-              <div className="border-t pt-4 space-y-3">
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span className="text-green-700">R${(total / 100).toFixed(2)}</span>
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {/* Total */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                  <span style={{ fontWeight: 600, color: 'rgba(240,240,240,0.7)', fontSize: '0.9375rem' }}>Total</span>
+                  <span style={{ fontWeight: 800, color: '#4ADE80', fontSize: '1.25rem', letterSpacing: '-0.02em' }}>
+                    R${(total / 100).toFixed(2)}
+                  </span>
                 </div>
 
+                {/* Tipo */}
                 <div>
-                  <p className="text-xs font-medium text-gray-500 mb-1.5">Tipo</p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'rgba(240,240,240,0.4)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Tipo
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
                     {['balcao', 'delivery'].map((t) => (
                       <button
                         key={t}
                         onClick={() => setTipo(t)}
-                        className={`py-1.5 rounded-lg text-sm font-medium border transition ${tipo === t ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                        style={{
+                          padding: '7px',
+                          borderRadius: '7px',
+                          fontSize: '0.8125rem',
+                          fontWeight: 500,
+                          border: tipo === t ? '1px solid rgba(45,106,79,0.5)' : '1px solid rgba(255,255,255,0.08)',
+                          background: tipo === t ? 'rgba(45,106,79,0.2)' : 'rgba(255,255,255,0.04)',
+                          color: tipo === t ? '#4ADE80' : 'rgba(240,240,240,0.55)',
+                          cursor: 'pointer',
+                          fontFamily: 'inherit',
+                          transition: 'all 0.15s',
+                        }}
                       >
-                        {t === 'balcao' ? '🏪 Balcão' : '🛵 Delivery'}
+                        {t === 'balcao' ? 'Balcão' : 'Delivery'}
                       </button>
                     ))}
                   </div>
                 </div>
 
+                {/* Pagamento */}
                 <div>
-                  <p className="text-xs font-medium text-gray-500 mb-1.5">Pagamento</p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'rgba(240,240,240,0.4)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    Pagamento
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
                     {PAGAMENTOS.map((p) => (
                       <button
                         key={p}
                         onClick={() => setPagamento(p)}
-                        className={`py-1.5 rounded-lg text-xs font-medium border transition ${pagamento === p ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                        style={{
+                          padding: '7px 4px',
+                          borderRadius: '7px',
+                          fontSize: '0.75rem',
+                          fontWeight: 500,
+                          border: pagamento === p ? '1px solid rgba(45,106,79,0.5)' : '1px solid rgba(255,255,255,0.08)',
+                          background: pagamento === p ? 'rgba(45,106,79,0.2)' : 'rgba(255,255,255,0.04)',
+                          color: pagamento === p ? '#4ADE80' : 'rgba(240,240,240,0.55)',
+                          cursor: 'pointer',
+                          fontFamily: 'inherit',
+                          transition: 'all 0.15s',
+                        }}
                       >
                         {p}
                       </button>
@@ -152,7 +287,17 @@ export default function PDVModal({ onClose }) {
                 <button
                   onClick={handleFinalizar}
                   disabled={cart.length === 0 || isPending}
-                  className="w-full btn-primary justify-center py-3 text-base"
+                  className="btn"
+                  style={{
+                    background: 'linear-gradient(135deg, #2D6A4F, #1F4E38)',
+                    color: '#F0F0F0',
+                    width: '100%',
+                    justifyContent: 'center',
+                    padding: '12px',
+                    fontSize: '0.9375rem',
+                    opacity: cart.length === 0 ? 0.45 : 1,
+                    cursor: cart.length === 0 ? 'not-allowed' : 'pointer',
+                  }}
                 >
                   {isPending ? 'Processando...' : 'Finalizar Venda'}
                 </button>

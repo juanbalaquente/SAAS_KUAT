@@ -4,13 +4,13 @@ import { useAuth } from '../store/AuthContext';
 const navByRole = {
   dono: [
     { to: '/dashboard', label: 'Dashboard' },
-    { to: '/barbearia', label: '✂️ Barbearia' },
-    { to: '/lavajato', label: '🚗 Lava Kuat' },
-    { to: '/adega', label: '🍷 Adega R1' },
+    { to: '/barbearia', label: 'Barbearia' },
+    { to: '/lavajato', label: 'Lava Kuat' },
+    { to: '/adega', label: 'Adega R1' },
   ],
-  barbeiro: [{ to: '/barbearia', label: '✂️ Barbearia Kuat' }],
-  atendente_lava: [{ to: '/lavajato', label: '🚗 Lava Kuat' }],
-  atendente_adega: [{ to: '/adega', label: '🍷 Adega R1' }],
+  barbeiro: [{ to: '/barbearia', label: 'Barbearia Kuat' }],
+  atendente_lava: [{ to: '/lavajato', label: 'Lava Kuat' }],
+  atendente_adega: [{ to: '/adega', label: 'Adega R1' }],
 };
 
 export default function Layout({ children }) {
@@ -26,35 +26,87 @@ export default function Layout({ children }) {
   const nav = navByRole[user?.role] || [];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
-              <Link to="/" className="font-bold text-xl text-gray-900">
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#0F1117' }}>
+      <header style={{
+        background: '#161B22',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+      }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '60px' }}>
+            {/* Logo + nav */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+              <Link
+                to="/"
+                style={{
+                  fontWeight: 800,
+                  fontSize: '1.0625rem',
+                  letterSpacing: '-0.02em',
+                  color: '#F0F0F0',
+                  textDecoration: 'none',
+                }}
+              >
                 SAAS Kuat
               </Link>
-              <nav className="flex items-center gap-1">
-                {nav.map((item) => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      location.pathname === item.to
-                        ? 'bg-gray-100 text-gray-900'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+
+              <nav style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                {nav.map((item) => {
+                  const isActive = location.pathname === item.to;
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '7px',
+                        fontSize: '0.875rem',
+                        fontWeight: isActive ? 600 : 400,
+                        textDecoration: 'none',
+                        color: isActive ? '#F0F0F0' : 'rgba(240,240,240,0.5)',
+                        background: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
+                        transition: 'color 0.15s, background 0.15s',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.color = 'rgba(240,240,240,0.85)';
+                          e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.color = 'rgba(240,240,240,0.5)';
+                          e.currentTarget.style.background = 'transparent';
+                        }
+                      }}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
               </nav>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-gray-600">{user?.name}</span>
+
+            {/* User + logout */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <span style={{ fontSize: '0.875rem', color: 'rgba(240,240,240,0.5)' }}>
+                {user?.name}
+              </span>
               <button
                 onClick={handleLogout}
-                className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                style={{
+                  fontSize: '0.8125rem',
+                  color: 'rgba(240,240,240,0.35)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '4px 0',
+                  transition: 'color 0.15s',
+                  fontFamily: 'inherit',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(240,240,240,0.75)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(240,240,240,0.35)'; }}
               >
                 Sair
               </button>
@@ -62,7 +114,14 @@ export default function Layout({ children }) {
           </div>
         </div>
       </header>
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+      <main style={{
+        flex: 1,
+        maxWidth: '1280px',
+        width: '100%',
+        margin: '0 auto',
+        padding: '32px 24px',
+      }}>
         {children}
       </main>
     </div>
