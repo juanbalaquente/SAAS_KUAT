@@ -37,6 +37,41 @@ class DashboardController extends Controller
 
         $fatAdega = Pedido::whereDate('created_at', $hoje)->where('status', '!=', 'cancelado')->sum('total_cents');
 
+        // Últimos agendamentos do dia
+        $agendamentosRecentes = Agendamento::with(['cliente', 'servico', 'loja'])
+            ->whereDate('scheduled_at', $hoje)
+            ->orderBy('scheduled_at')
+            ->limit(8)
+            ->get()
+            ->map(fn($ag) => [
+                'id'           => $ag->id,
+                'cliente'      => $ag->cliente?->name,
+                'servico'      => $ag->servico?->name,
+                'loja'         => $ag->loja?->name,
+                'loja_slug'    => $ag->loja?->slug,
+                'status'       => $ag->status,
+                'scheduled_at' => $ag->scheduled_at,
+            ]);
+
+        // Faturamento dos últimos 7 dias
+        $fatSemana = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $dia = now()->subDays($i)->toDateString();
+            $fatB = Agendamento::where('agendamentos.loja_id', $barbearia?->id)
+                ->whereDate('scheduled_at', $dia)->where('status', 'concluido')
+                ->join('servicos', 'agendamentos.servico_id', '=', 'servicos.id')
+                ->sum('servicos.price_cents');
+            $fatL = Agendamento::where('agendamentos.loja_id', $lavaKuat?->id)
+                ->whereDate('scheduled_at', $dia)->where('status', 'concluido')
+                ->join('servicos', 'agendamentos.servico_id', '=', 'servicos.id')
+                ->sum('servicos.price_cents');
+            $fatA = Pedido::whereDate('created_at', $dia)->where('status', '!=', 'cancelado')->sum('total_cents');
+            $fatSemana[] = [
+                'dia'   => now()->subDays($i)->format('d/m'),
+                'total' => (int)($fatB + $fatL + $fatA),
+            ];
+        }
+
         return response()->json([
             'success' => true,
             'data'    => [
@@ -62,6 +97,8 @@ class DashboardController extends Controller
                     'entregas_pendentes' => Pedido::whereIn('status', ['aguardando', 'preparando', 'em_rota'])->count(),
                     'faturamento'        => (int) $fatAdega,
                 ],
+                'agendamentos_recentes' => $agendamentosRecentes,
+                'faturamento_semana'    => $fatSemana,
             ],
         ]);
     }
