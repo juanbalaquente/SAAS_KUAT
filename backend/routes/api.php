@@ -38,9 +38,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/lavajato/boxes/{id}',   [LavaJatoController::class, 'updateBox']);
     Route::post('/lavajato/checklist',     [LavaJatoController::class, 'salvarChecklist']);
 
-    Route::get('/adega/estoque', [AdegaController::class, 'estoque']);
-    Route::get('/adega/alertas', [AdegaController::class, 'alertas']);
-    Route::post('/adega/pdv',    [AdegaController::class, 'processarVenda']);
+    Route::get('/adega/estoque',          [AdegaController::class, 'estoque']);
+    Route::get('/adega/alertas',          [AdegaController::class, 'alertas']);
+    Route::get('/adega/vendas-hoje',      [AdegaController::class, 'vendasHoje']);
+    Route::get('/adega/movimentacoes',    [AdegaController::class, 'movimentacoes']);
+    Route::post('/adega/pdv',             [AdegaController::class, 'processarVenda']);
+    Route::post('/adega/movimentacao',    [AdegaController::class, 'movimentarEstoque']);
 
     Route::apiResource('pedidos', PedidoController::class);
     Route::patch('/pedidos/{id}/status', [PedidoController::class, 'updateStatus']);
