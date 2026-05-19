@@ -16,15 +16,22 @@ class EnviarNPS implements ShouldQueue
 
     public function __construct(public Agendamento $agendamento) {}
 
+    public int $tries = 3;
+
     public function handle(WhatsAppService $whatsapp): void
     {
-        $ag = $this->agendamento->load(['cliente', 'servico', 'loja']);
-        $message = "⭐ *Avalie seu atendimento!*\n\n"
-                 . "Olá, {$ag->cliente->name}!\n"
-                 . "Como foi sua experiência na *{$ag->loja->name}*?\n\n"
-                 . "De 1 a 10, quanto você indicaria para um amigo?\n"
-                 . "Responda aqui mesmo com o número. Sua opinião é muito importante para nós! 🙏";
+        try {
+            $ag = $this->agendamento->load(['cliente', 'servico', 'loja']);
+            $message = "⭐ *Avalie seu atendimento!*\n\n"
+                     . "Olá, {$ag->cliente->name}!\n"
+                     . "Como foi sua experiência na *{$ag->loja->name}*?\n\n"
+                     . "De 1 a 10, quanto você indicaria para um amigo?\n"
+                     . "Responda aqui mesmo com o número. Sua opinião é muito importante para nós! 🙏";
 
-        $whatsapp->send($ag->cliente->phone, $message, $ag->cliente->id);
+            $whatsapp->send($ag->cliente->phone, $message, $ag->cliente->id);
+        } catch (\Throwable $e) {
+            \Log::error('EnviarNPS falhou', ['ag_id' => $this->agendamento->id, 'error' => $e->getMessage()]);
+            throw $e;
+        }
     }
 }

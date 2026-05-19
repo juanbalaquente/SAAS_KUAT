@@ -33,9 +33,12 @@ export default function PDVModal({ onClose }) {
     queryFn: () => api.get('/adega/estoque').then((r) => r.data.data),
   });
 
+  const [erro, setErro] = useState('');
+
   const { mutate: finalizar, isPending } = useMutation({
     mutationFn: (payload) => api.post('/adega/pdv', payload),
     onSuccess: () => { setSuccess(true); setTimeout(onClose, 2000); },
+    onError: (e) => setErro(e.response?.data?.message || 'Erro ao finalizar venda. Tente novamente.'),
   });
 
   const filtered = produtos?.filter((p) =>
@@ -61,7 +64,7 @@ export default function PDVModal({ onClose }) {
   };
 
   const total = cart.reduce((sum, i) => sum + i.preco_cents * i.qty, 0);
-  const trocoVal = pagamento === 'Dinheiro' && troco ? (parseFloat(troco) * 100 - total) : null;
+  const trocoVal = pagamento === 'Dinheiro' && troco ? (Math.round(parseFloat(troco) * 100) - total) : null;
 
   const handleFinalizar = () => {
     finalizar({
@@ -280,7 +283,10 @@ export default function PDVModal({ onClose }) {
                   </div>
                 )}
 
-                <button onClick={handleFinalizar}
+                {erro && (
+                  <p style={{ color: '#F87171', fontSize: '0.8125rem', textAlign: 'center', margin: '0 0 10px', background: 'rgba(248,113,113,0.1)', padding: '8px 12px', borderRadius: '8px' }}>{erro}</p>
+                )}
+                <button onClick={() => { setErro(''); handleFinalizar(); }}
                   disabled={cart.length === 0 || isPending || (tipo === 'delivery' && !endereco) || (pagamento === 'Dinheiro' && trocoVal !== null && trocoVal < 0)}
                   className="btn"
                   style={{

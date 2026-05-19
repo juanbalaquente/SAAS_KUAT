@@ -83,9 +83,12 @@ export default function AgendamentoPage() {
     enabled: !!selectedServico && step >= (isAdega ? 2 : 2),
   });
 
+  const [erroAgendar, setErroAgendar] = useState('');
+
   const { mutate: agendar, isPending } = useMutation({
     mutationFn: (payload) => api.post(`/lojas/${loja}/agendar`, payload),
     onSuccess: (res) => navigate(`/confirmacao/${res.data.data.id}`),
+    onError: (e) => setErroAgendar(e.response?.data?.message || 'Erro ao agendar. Tente novamente.'),
   });
 
   const days = Array.from({ length: 14 }, (_, i) => addDays(new Date(), i));
@@ -376,6 +379,9 @@ export default function AgendamentoPage() {
               </div>
             )}
           </div>
+        )}
+        {erroAgendar && (
+          <p style={{ color: '#F87171', fontSize: '0.8125rem', textAlign: 'center', background: 'rgba(248,113,113,0.1)', padding: '10px 14px', borderRadius: '8px', margin: '0 0 4px' }}>{erroAgendar}</p>
         )}
         <button type="submit" disabled={isPending || (isAdega && isDelivery && !endereco)} className="btn"
           style={{ background: `linear-gradient(135deg, ${config.color}, ${config.colorDark})`, color: '#F0F0F0', width: '100%', justifyContent: 'center', padding: '13px', fontSize: '0.9375rem', marginTop: '4px' }}>

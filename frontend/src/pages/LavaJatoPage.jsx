@@ -112,7 +112,9 @@ export default function LavaJatoPage() {
 
   const { data: agenda } = useQuery({
     queryKey: ['lava-agenda'],
-    queryFn: () => api.get('/barbearia/agenda-hoje').then((r) => r.data.data),
+    queryFn: () => api.get('/agendamentos', {
+      params: { loja_id: 2, data: new Date().toISOString().split('T')[0] },
+    }).then((r) => r.data.data),
     refetchInterval: 30000,
   });
 

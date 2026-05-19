@@ -216,14 +216,14 @@ export default function DashboardPage() {
             <div className="card" style={{ padding: '32px', textAlign: 'center', color: 'rgba(240,240,240,0.3)' }}>Carregando...</div>
           ) : (
             <div style={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden' }}>
-              {resumo.agendamentos_recentes.map((ag, i) => {
+              {(resumo?.agendamentos_recentes || []).map((ag, i) => {
                 const st = STATUS_AG[ag.status] || STATUS_AG.pendente;
                 const hora = new Date(ag.scheduled_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 const cor = LOJA_COLOR[ag.loja_slug] || '#4ADE80';
                 return (
                   <div key={ag.id} style={{
                     display: 'flex', alignItems: 'center', gap: '14px', padding: '11px 18px',
-                    borderBottom: i < resumo.agendamentos_recentes.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                    borderBottom: i < (resumo?.agendamentos_recentes?.length ?? 1) - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
                     transition: 'background 0.1s',
                   }}
                     onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}

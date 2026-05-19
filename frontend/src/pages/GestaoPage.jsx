@@ -72,13 +72,17 @@ function ServicosTab() {
     queryFn: () => api.get('/servicos').then((r) => r.data.data),
   });
 
+  const [erroServico, setErroServico] = useState('');
+
   const save = useMutation({
     mutationFn: (d) => d.id ? api.put(`/servicos/${d.id}`, d) : api.post('/servicos', d),
-    onSuccess: () => { qc.invalidateQueries(['servicos']); setModal(null); },
+    onSuccess: () => { qc.invalidateQueries(['servicos']); setModal(null); setErroServico(''); },
+    onError: (e) => setErroServico(e.response?.data?.message || 'Erro ao salvar.'),
   });
   const del = useMutation({
     mutationFn: (id) => api.delete(`/servicos/${id}`),
     onSuccess: () => qc.invalidateQueries(['servicos']),
+    onError: () => alert('Erro ao excluir serviço.'),
   });
 
   const openNovo = () => { setForm({ ativo: true }); setModal('novo'); };
@@ -143,6 +147,7 @@ function ServicosTab() {
               <option value="0" style={{ background: '#1C2128' }}>Inativo</option>
             </select>
           </FormField>
+          {erroServico && <p style={{ color: '#F87171', fontSize: '0.8125rem', marginBottom: '8px' }}>{erroServico}</p>}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
             <BtnGhost onClick={() => setModal(null)}>Cancelar</BtnGhost>
             <BtnPrimary onClick={() => save.mutate(form)} disabled={save.isPending}>
@@ -166,13 +171,17 @@ function ProfissionaisTab() {
     queryFn: () => api.get('/profissionais').then((r) => r.data.data),
   });
 
+  const [erroProf, setErroProf] = useState('');
+
   const save = useMutation({
     mutationFn: (d) => d.id ? api.put(`/profissionais/${d.id}`, d) : api.post('/profissionais', d),
-    onSuccess: () => { qc.invalidateQueries(['profissionais']); setModal(null); },
+    onSuccess: () => { qc.invalidateQueries(['profissionais']); setModal(null); setErroProf(''); },
+    onError: (e) => setErroProf(e.response?.data?.message || 'Erro ao salvar.'),
   });
   const del = useMutation({
     mutationFn: (id) => api.delete(`/profissionais/${id}`),
     onSuccess: () => qc.invalidateQueries(['profissionais']),
+    onError: () => alert('Erro ao remover profissional.'),
   });
 
   const f = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
@@ -224,6 +233,7 @@ function ProfissionaisTab() {
               <option value="0" style={{ background: '#1C2128' }}>Inativo</option>
             </select>
           </FormField>
+          {erroProf && <p style={{ color: '#F87171', fontSize: '0.8125rem', marginBottom: '8px' }}>{erroProf}</p>}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
             <BtnGhost onClick={() => setModal(null)}>Cancelar</BtnGhost>
             <BtnPrimary onClick={() => save.mutate(form)} disabled={save.isPending}>
@@ -248,13 +258,17 @@ function ProdutosTab() {
     queryFn: () => api.get('/produtos', { params: { todos: showInativos ? 1 : 0 } }).then((r) => r.data.data),
   });
 
+  const [erroProd, setErroProd] = useState('');
+
   const save = useMutation({
     mutationFn: (d) => d.id ? api.put(`/produtos/${d.id}`, d) : api.post('/produtos', d),
-    onSuccess: () => { qc.invalidateQueries(['produtos-admin']); setModal(null); },
+    onSuccess: () => { qc.invalidateQueries(['produtos-admin']); setModal(null); setErroProd(''); },
+    onError: (e) => setErroProd(e.response?.data?.message || 'Erro ao salvar.'),
   });
   const del = useMutation({
     mutationFn: (id) => api.delete(`/produtos/${id}`),
     onSuccess: () => qc.invalidateQueries(['produtos-admin']),
+    onError: () => alert('Erro ao desativar produto.'),
   });
 
   const f = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
@@ -328,6 +342,7 @@ function ProdutosTab() {
               <option value="0" style={{ background: '#1C2128' }}>Inativo</option>
             </select>
           </FormField>
+          {erroProd && <p style={{ color: '#F87171', fontSize: '0.8125rem', marginBottom: '8px' }}>{erroProd}</p>}
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
             <BtnGhost onClick={() => setModal(null)}>Cancelar</BtnGhost>
             <BtnPrimary onClick={() => save.mutate(form)} disabled={save.isPending}>

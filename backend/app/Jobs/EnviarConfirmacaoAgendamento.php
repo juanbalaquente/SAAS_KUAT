@@ -16,8 +16,11 @@ class EnviarConfirmacaoAgendamento implements ShouldQueue
 
     public function __construct(public Agendamento $agendamento) {}
 
+    public int $tries = 3;
+
     public function handle(WhatsAppService $whatsapp): void
     {
+        try {
         $ag   = $this->agendamento->load(['cliente', 'servico', 'profissional', 'loja']);
         $hora = $ag->scheduled_at->format('d/m/Y \à\s H:i');
 
@@ -54,5 +57,9 @@ class EnviarConfirmacaoAgendamento implements ShouldQueue
         }
 
         $whatsapp->send($ag->cliente->phone, $message, $ag->cliente->id);
+        } catch (\Throwable $e) {
+            \Log::error('EnviarConfirmacaoAgendamento falhou', ['ag_id' => $this->agendamento->id, 'error' => $e->getMessage()]);
+            throw $e;
+        }
     }
 }

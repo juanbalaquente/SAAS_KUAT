@@ -16,15 +16,22 @@ class EnviarLembreteAgendamento implements ShouldQueue
 
     public function __construct(public Agendamento $agendamento) {}
 
+    public int $tries = 3;
+
     public function handle(WhatsAppService $whatsapp): void
     {
-        $ag   = $this->agendamento->load(['cliente', 'servico', 'loja']);
-        $hora = $ag->scheduled_at->format('H:i');
-        $message = "⏰ *Lembrete de agendamento*\n\n"
-                 . "Olá, {$ag->cliente->name}!\n"
-                 . "Seu {$ag->servico->name} na {$ag->loja->name} é daqui a 1 hora ({$hora}).\n\n"
-                 . "Até logo! 👋";
+        try {
+            $ag   = $this->agendamento->load(['cliente', 'servico', 'loja']);
+            $hora = $ag->scheduled_at->format('H:i');
+            $message = "⏰ *Lembrete de agendamento*\n\n"
+                     . "Olá, {$ag->cliente->name}!\n"
+                     . "Seu {$ag->servico->name} na {$ag->loja->name} é daqui a 1 hora ({$hora}).\n\n"
+                     . "Até logo! 👋";
 
-        $whatsapp->send($ag->cliente->phone, $message, $ag->cliente->id);
+            $whatsapp->send($ag->cliente->phone, $message, $ag->cliente->id);
+        } catch (\Throwable $e) {
+            \Log::error('EnviarLembreteAgendamento falhou', ['ag_id' => $this->agendamento->id, 'error' => $e->getMessage()]);
+            throw $e;
+        }
     }
 }

@@ -35,6 +35,17 @@ class AdegaController extends Controller
             'tipo'              => 'required|in:balcao,delivery',
         ]);
 
+        // Validar estoque antes de abrir transação
+        foreach ($request->itens as $item) {
+            $produto = Produto::findOrFail($item['produto_id']);
+            if ($produto->estoque_atual < $item['quantidade']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Estoque insuficiente para \"{$produto->nome}\" (disponível: {$produto->estoque_atual}).",
+                ], 422);
+            }
+        }
+
         DB::transaction(function () use ($request, &$pedido) {
             $total = 0;
             foreach ($request->itens as $item) {
@@ -86,6 +97,9 @@ class AdegaController extends Controller
             if ($request->tipo === 'entrada') {
                 $produto->increment('estoque_atual', $request->quantidade);
             } elseif ($request->tipo === 'saida') {
+                if ($produto->estoque_atual < $request->quantidade) {
+                    throw new \Exception("Estoque insuficiente para \"{$produto->nome}\".");
+                }
                 $produto->decrement('estoque_atual', $request->quantidade);
             } else {
                 $produto->update(['estoque_atual' => $request->quantidade]);
