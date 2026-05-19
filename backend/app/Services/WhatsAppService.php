@@ -28,8 +28,8 @@ class WhatsAppService
             if ($this->url && $this->key) {
                 $response = Http::withHeaders(['apikey' => $this->key])
                     ->post("{$this->url}/message/sendText/{$this->instance}", [
-                        'number'      => $phone,
-                        'textMessage' => ['text' => $message],
+                        'number' => $phone,
+                        'text'   => $message,
                     ]);
 
                 if (!$response->successful()) {

@@ -34,9 +34,16 @@ const LOJA_CONFIG = {
   adega_r1:       { name: 'Adega R1',       Icon: WineIcon,     color: '#2D6A4F', colorDark: '#1F4E38' },
 };
 
+function maskPhone(value) {
+  const d = value.replace(/\D/g, '').slice(0, 11);
+  if (d.length <= 10)
+    return d.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+  return d.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+}
+
 const clienteSchema = z.object({
   name:  z.string().min(2, 'Nome obrigatório'),
-  phone: z.string().min(10, 'Telefone inválido'),
+  phone: z.string().min(14, 'Telefone inválido — use (XX) XXXXX-XXXX'),
   email: z.string().email('E-mail inválido').optional().or(z.literal('')),
 });
 
@@ -62,7 +69,7 @@ export default function AgendamentoPage() {
   const [cart,                 setCart]                 = useState([]); // [{...produto, qty}]
   const [endereco,             setEndereco]             = useState('');
 
-  const { register, handleSubmit, formState: { errors } } = useForm({ resolver: zodResolver(clienteSchema) });
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm({ resolver: zodResolver(clienteSchema) });
 
   const { data: servicos } = useQuery({
     queryKey: ['servicos', loja],
@@ -345,7 +352,16 @@ export default function AgendamentoPage() {
         </div>
         <div>
           <label style={labelStyle}>Telefone / WhatsApp *</label>
-          <input {...register('phone')} style={inputStyle} placeholder="(99) 99999-9999" />
+          <input
+            {...register('phone')}
+            style={inputStyle}
+            placeholder="(31) 99999-9999"
+            inputMode="numeric"
+            onChange={(e) => {
+              const masked = maskPhone(e.target.value);
+              setValue('phone', masked, { shouldValidate: true });
+            }}
+          />
           {errors.phone && <p style={{ color: '#F87171', fontSize: '0.75rem', marginTop: '4px' }}>{errors.phone.message}</p>}
         </div>
         <div>

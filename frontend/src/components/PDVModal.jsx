@@ -4,6 +4,13 @@ import api from '../services/api';
 
 const PAGAMENTOS = ['PIX', 'Dinheiro', 'Cartão Débito', 'Cartão Crédito'];
 
+function maskPhone(value) {
+  const d = value.replace(/\D/g, '').slice(0, 11);
+  if (d.length <= 10)
+    return d.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+  return d.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3').replace(/-$/, '');
+}
+
 const STATUS_AG = {
   pendente:       { label: 'Pendente',    color: 'rgba(240,240,240,0.5)',  bg: 'rgba(255,255,255,0.07)' },
   confirmado:     { label: 'Confirmado',  color: '#60A5FA',                bg: 'rgba(59,130,246,0.12)' },
@@ -219,8 +226,13 @@ export default function PDVModal({ onClose }) {
                   <p style={labelStyle}>Cliente <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(opcional)</span></p>
                   <input value={cliente.nome} onChange={(e) => setCliente((c) => ({ ...c, nome: e.target.value }))}
                     placeholder="Nome do cliente" className="input" style={{ marginBottom: '6px' }} />
-                  <input value={cliente.telefone} onChange={(e) => setCliente((c) => ({ ...c, telefone: e.target.value }))}
-                    placeholder="Telefone" className="input" />
+                  <input
+                    value={cliente.telefone}
+                    onChange={(e) => setCliente((c) => ({ ...c, telefone: maskPhone(e.target.value) }))}
+                    placeholder="(31) 99999-9999"
+                    inputMode="numeric"
+                    className="input"
+                  />
                 </div>
 
                 {/* Tipo */}
